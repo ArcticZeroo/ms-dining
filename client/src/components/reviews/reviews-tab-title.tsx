@@ -5,15 +5,14 @@ import { IReviewLookup } from '../../models/reviews.js';
 
 interface IReviewsTabTitleProps {
     lookup: IReviewLookup;
-    stationId?: string;
 }
 
 /**
  * Tab label for the reviews tab: "Reviews" plus a compact score/count summary.
  * Owns the review-summary query so its loading only re-renders the label.
  */
-export const ReviewsTabTitle: React.FC<IReviewsTabTitleProps> = ({ lookup, stationId }) => {
-    const { status, data } = useReviewSummary(lookup, stationId);
+export const ReviewsTabTitle: React.FC<IReviewsTabTitleProps> = ({ lookup }) => {
+    const { status, data } = useReviewSummary(lookup);
 
     let summary: React.ReactNode = null;
 
@@ -21,9 +20,8 @@ export const ReviewsTabTitle: React.FC<IReviewsTabTitleProps> = ({ lookup, stati
         summary = <span className="subtitle loading-skeleton">Loading...</span>;
     } else if (data != null && data.totalCount > 0) {
         summary = <span className="subtitle">{formatReviewScore(data.overallRating, data.totalCount)}</span>;
-    } else if (data != null) {
-        summary = <span className="subtitle">No reviews yet</span>;
     }
+    // intentionally not handling the "no reviews yet" case, would prefer the user gets curious and leaves a review
 
     return (
         <span className="flex align-center constant-gap">

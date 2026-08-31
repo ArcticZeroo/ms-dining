@@ -1,4 +1,5 @@
 import type { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
+import type { IReview, IReviewSummary } from '@msdining/common/models/review';
 import type { IServerReview } from '../models/review.js';
 import { EmptyObject } from '../models/util.js';
 
@@ -46,6 +47,12 @@ export interface IReviewService {
     getReviewsForMenuItem(data: { menuItem: IMenuItemBase }): Promise<IMenuItemReviewsResult>;
     getReviewsForStation(data: { station: { name: string; groupId?: string | null } }): Promise<IServerReview[]>;
     getReviewsForUser(data: { userId: string; menuItemId?: string }): Promise<IServerReview[]>;
+
+    // Cached aggregate review summaries (user-agnostic). The caller's own
+    // review is layered on per-request via getMyReviews.
+    retrieveReviewSummary(data: { menuItem: IMenuItemBase }): Promise<IReviewSummary>;
+    getMyReviews(data: { userId: string; menuItemId?: string; stationId?: string }): Promise<{ menuItemReview: IReview | null; stationReview: IReview | null }>;
+
     retrieveReviewHeader(data: { menuItem: IMenuItemBase }): Promise<IMenuItemReviewHeader>;
     retrieveStationReviewHeader(data: { station: { name: string; groupId?: string | null } }): Promise<IMenuItemReviewHeader>;
     retrieveReviewHeaderByParts(data: { groupId?: string | null; name: string }): Promise<IMenuItemReviewHeader>;

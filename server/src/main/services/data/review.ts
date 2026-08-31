@@ -12,6 +12,10 @@ export const reviewService: IReviewService = {
         dataHandler.sendRequest('review', 'getReviewsForStation', data),
     getReviewsForUser: (data) =>
         dataHandler.sendRequest('review', 'getReviewsForUser', data),
+    retrieveReviewSummary: (data) =>
+        dataHandler.sendRequest('review', 'retrieveReviewSummary', data),
+    getMyReviews: (data) =>
+        dataHandler.sendRequest('review', 'getMyReviews', data),
     retrieveReviewHeader: (data) =>
         dataHandler.sendRequest('review', 'retrieveReviewHeader', data),
     retrieveStationReviewHeader: (data) =>

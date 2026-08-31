@@ -2,33 +2,11 @@ import { ICreateReviewRequest, IUpdateReviewRequest } from '@msdining/common/mod
 import { IReview, IReviewSummary, IReviewWithComment } from '@msdining/common/models/review';
 import { toDateString } from '@msdining/common/util/date-util';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import { DiningClient } from '../../api/client/dining.ts';
 import { getReviewEntityId, getReviewEntityName, IReviewLookup, isStationReview } from '../../models/reviews.ts';
 import { queryKeys } from './keys.ts';
 
 const RECENT_REVIEWS_COUNT = 10;
-
-// ---------- Station→menuItem index ----------
-
-/**
- * Tracks which menu-item summaries are currently associated with each station,
- * so a station-review mutation can patch the affected menu-item caches.
- *
- * Populated lazily by `useReviewSummary(lookup, stationId)`. We never remove
- * entries — the Map only grows with the number of unique menu items viewed in
- * a session, which is small.
- */
-const menuItemsByStationId = new Map<string /*stationId*/, Set<string /*menuItemId*/>>();
-
-const recordStationAssociation = (menuItemId: string, stationId: string) => {
-    let bucket = menuItemsByStationId.get(stationId);
-    if (!bucket) {
-        bucket = new Set();
-        menuItemsByStationId.set(stationId, bucket);
-    }
-    bucket.add(menuItemId);
-};
 
 // ---------- Pure projection / patch helpers (exported for testing) ----------
 
@@ -246,21 +224,12 @@ export interface ICreateReviewContext {
 // ---------- Queries ----------
 
 /**
- * Loads the review summary for a menu item or station. When viewing a menu
- * item that belongs to a station, pass the `stationId` so station-review
- * mutations elsewhere in the app can patch this menu-item summary too.
+ * Loads the review summary for a menu item or station. Station-review
+ * mutations elsewhere in the app invalidate every menu-item summary, so this
+ * hook can stay a pure read — no cross-entity bookkeeping needed.
  */
-export const useReviewSummary = (lookup: IReviewLookup, stationId?: string) => {
+export const useReviewSummary = (lookup: IReviewLookup) => {
     const entityId = getReviewEntityId(lookup);
-    const menuItemId = !isStationReview(lookup) ? entityId : undefined;
-
-    // Record association once we know both ids — used by station-review
-    // mutations to find affected menu-item summaries.
-    useEffect(() => {
-        if (menuItemId && stationId) {
-            recordStationAssociation(menuItemId, stationId);
-        }
-    }, [menuItemId, stationId]);
 
     return useQuery({
         queryKey: queryKeys.reviews.entityById(entityId),
@@ -306,24 +275,18 @@ const patchMine = (queryClient: QueryClientInstance, updater: (reviews: IReview[
     patchQueryData<IReview[]>(queryClient, queryKeys.reviews.mine, updater);
 
 /**
- * Applies `updater` to every cached menu-item summary that belongs to the
- * given station, using the menuItemsByStationId index.
+ * A station review is aggregated into every menu-item summary at that station
+ * (the server folds station reviews into each item's summary). We can't know
+ * which menu-item summaries are cached, so invalidate all *other* entity
+ * summaries — the station's own summary is patched optimistically by the
+ * caller. The summary endpoint is cheap and revalidated, so the refetch is
+ * fresh.
  */
-const patchMenuItemSummariesForStation = async (
-    queryClient: QueryClientInstance,
-    stationId: string,
-    updater: (current: IReviewSummary) => IReviewSummary,
-): Promise<void> => {
-    const menuItemIds = menuItemsByStationId.get(stationId);
-    if (!menuItemIds || menuItemIds.size === 0) {
-        return;
-    }
-    const tasks: Promise<void>[] = [];
-    for (const menuItemId of menuItemIds) {
-        tasks.push(patchSummary(queryClient, menuItemId, updater));
-    }
-    await Promise.all(tasks);
-};
+const invalidateOtherReviewSummaries = (queryClient: QueryClientInstance, entityId: string) =>
+    queryClient.invalidateQueries({
+        queryKey:  queryKeys.reviews.summary,
+        predicate: (query) => query.queryKey[2] !== entityId,
+    });
 
 interface ICreateReviewArgs {
     lookup: IReviewLookup;
@@ -346,7 +309,7 @@ export const useCreateReview = () => {
             await patchSummary(queryClient, entityId, summaryUpdater);
 
             if (isStation) {
-                await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
+                await invalidateOtherReviewSummaries(queryClient, entityId);
             } else {
                 // Order-history rows show the user's own menu-item review
                 // inline; invalidate every range so the badge flips from
@@ -386,7 +349,7 @@ export const useUpdateReview = () => {
             await patchSummary(queryClient, entityId, summaryUpdater);
 
             if (isStationReview(lookup)) {
-                await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
+                await invalidateOtherReviewSummaries(queryClient, entityId);
             } else {
                 await queryClient.invalidateQueries({ queryKey: queryKeys.ordering.orderHistoryAll });
             }
@@ -416,7 +379,7 @@ export const useDeleteReview = () => {
             await patchSummary(queryClient, entityId, summaryUpdater);
 
             if (isStationReview(lookup)) {
-                await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
+                await invalidateOtherReviewSummaries(queryClient, entityId);
             } else {
                 await queryClient.invalidateQueries({ queryKey: queryKeys.ordering.orderHistoryAll });
             }

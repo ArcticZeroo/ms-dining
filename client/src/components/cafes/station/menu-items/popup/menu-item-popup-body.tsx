@@ -58,13 +58,13 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
         ];
 
         if (showReviews) {
-            tabs.push({ id: TAB_ID_REVIEWS, name: <ReviewsTabTitle lookup={lookup} stationId={stationId}/> });
+            tabs.push({ id: TAB_ID_REVIEWS, name: <ReviewsTabTitle lookup={lookup}/> });
         }
 
         tabs.push({ id: TAB_ID_HISTORY, name: 'Visit History' });
 
         return tabs;
-    }, [isOnlineOrderingAllowed, showReviews, lookup, stationId]);
+    }, [isOnlineOrderingAllowed, showReviews, lookup]);
 
     const effectiveTabId = tabOptions.some(tab => tab.id === selectedTabId) ? selectedTabId : TAB_ID_OVERVIEW;
 
@@ -76,7 +76,6 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                     cafeId={menuItem.cafeId}
                     lookup={lookup}
                     stationLookup={stationLookup}
-                    stationId={stationId}
                 />
             );
         case TAB_ID_HISTORY:
@@ -95,7 +94,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                 />
             );
         }
-    }, [menuItem, notes, getSelectedChoiceIdsForModifier, onSelectedChoiceIdsChanged, onNotesChanged, isOnlineOrderingAllowed, isOrderReview, lookup, stationLookup, stationId]);
+    }, [menuItem, notes, getSelectedChoiceIdsForModifier, onSelectedChoiceIdsChanged, onNotesChanged, isOnlineOrderingAllowed, isOrderReview, lookup, stationLookup]);
 
     return (
         <div className="menu-item-popup-body">

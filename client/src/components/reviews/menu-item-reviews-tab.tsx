@@ -7,15 +7,14 @@ interface IMenuItemReviewsTabProps {
     cafeId: string;
     lookup: IReviewLookup;
     stationLookup?: IReviewLookupForStation;
-    stationId?: string;
 }
 
 /**
  * Reviews-tab content. Owns the review-summary query so review loading only
  * re-renders this tab, not the whole popup / the active Overview tab.
  */
-export const MenuItemReviewsTab: React.FC<IMenuItemReviewsTabProps> = ({ cafeId, lookup, stationLookup, stationId }) => {
-    const { status, data, refetch } = useReviewSummary(lookup, stationId);
+export const MenuItemReviewsTab: React.FC<IMenuItemReviewsTabProps> = ({ cafeId, lookup, stationLookup }) => {
+    const { status, data, refetch } = useReviewSummary(lookup);
 
     return (
         <ReviewsView

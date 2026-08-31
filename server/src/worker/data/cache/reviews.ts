@@ -1,4 +1,5 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
+import { IReviewSummary } from '@msdining/common/models/review';
 import { getReviewEntityKeyFromParts, ReviewStorageClient } from '../storage/clients/review/review.js';
 import { StationStorageClient } from '../storage/clients/station/station.js';
 import { LockedMap } from '../../../shared/lock/map.js';
@@ -8,6 +9,12 @@ import { CACHE_EVENTS, STORAGE_EVENTS } from '../../../shared/util/events.js';
 
 const MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
 const STATION_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
+
+// Full aggregate review summaries (rating distribution + commented reviews),
+// cached per entity and combined at read time exactly like the headers above.
+// Lazily populated on cache-miss; invalidated by the same dirty events.
+const MENU_ITEM_REVIEW_SUMMARY_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IReviewSummary>();
+const STATION_REVIEW_SUMMARY_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IReviewSummary>();
 
 const INITIALIZED = lazyAsync(async () => {
     const [menuItemHeaders, stationHeaders] = await Promise.all([
@@ -29,8 +36,10 @@ const INITIALIZED = lazyAsync(async () => {
 
 STORAGE_EVENTS.on('reviewDirty', (event) => {
     const entityKey = getReviewEntityKeyFromParts(event.groupId, event.normalizedName);
-    const cache = event.stationId ? STATION_REVIEW_DATA_BY_ENTITY_KEY : MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY;
-    cache.delete(entityKey)
+    const isStation = event.stationId != null;
+    const headerCache = isStation ? STATION_REVIEW_DATA_BY_ENTITY_KEY : MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY;
+    const summaryCache = isStation ? STATION_REVIEW_SUMMARY_BY_ENTITY_KEY : MENU_ITEM_REVIEW_SUMMARY_BY_ENTITY_KEY;
+    Promise.all([headerCache.delete(entityKey), summaryCache.delete(entityKey)])
         .then(() => {
             CACHE_EVENTS.emit('reviewDirty', event);
         })
@@ -42,11 +51,15 @@ STORAGE_EVENTS.on('reviewDirty', (event) => {
 STORAGE_EVENTS.on('groupMembershipDirty', (event) => {
     const deletions = [
         MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.delete(`group:${event.groupId}`),
-        STATION_REVIEW_DATA_BY_ENTITY_KEY.delete(`group:${event.groupId}`)
+        STATION_REVIEW_DATA_BY_ENTITY_KEY.delete(`group:${event.groupId}`),
+        MENU_ITEM_REVIEW_SUMMARY_BY_ENTITY_KEY.delete(`group:${event.groupId}`),
+        STATION_REVIEW_SUMMARY_BY_ENTITY_KEY.delete(`group:${event.groupId}`)
     ];
     for (const normalizedName of event.memberNormalizedNames) {
         deletions.push(MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.delete(`name:${normalizedName}`));
         deletions.push(STATION_REVIEW_DATA_BY_ENTITY_KEY.delete(`name:${normalizedName}`));
+        deletions.push(MENU_ITEM_REVIEW_SUMMARY_BY_ENTITY_KEY.delete(`name:${normalizedName}`));
+        deletions.push(STATION_REVIEW_SUMMARY_BY_ENTITY_KEY.delete(`name:${normalizedName}`));
     }
     Promise.all(deletions).catch(err => {
         console.error(`Failed to invalidate review headers for group "${event.groupId}":`, err);
@@ -154,6 +167,64 @@ export const retrieveStationReviewHeaderByPartsAsync = async (groupId: string | 
             return ReviewStorageClient.getStationReviewHeaderByName(normalizeNameForSearch(name));
         });
 }
+
+// --- Review summaries (full aggregate, combined at read like the headers) ---
+
+const createEmptySummary = (): IReviewSummary => ({
+    counts:              {},
+    reviewsWithComments: [],
+    totalCount:          0,
+    overallRating:       0,
+});
+
+const combineSummaries = (menuItemSummary: IReviewSummary, stationSummary: IReviewSummary): IReviewSummary => {
+    const counts: Record<number, number> = { ...menuItemSummary.counts };
+    for (const [rating, count] of Object.entries(stationSummary.counts)) {
+        counts[Number(rating)] = (counts[Number(rating)] ?? 0) + count;
+    }
+
+    const totalCount = menuItemSummary.totalCount + stationSummary.totalCount;
+    const overallRating = totalCount === 0
+        ? 0
+        : (menuItemSummary.overallRating * menuItemSummary.totalCount + stationSummary.overallRating * stationSummary.totalCount) / totalCount;
+
+    return {
+        counts,
+        totalCount,
+        overallRating,
+        reviewsWithComments: [...menuItemSummary.reviewsWithComments, ...stationSummary.reviewsWithComments],
+    };
+};
+
+const retrieveStationReviewSummaryAsync = async (station: IStationEntity): Promise<IReviewSummary> => {
+    const entityKey = getReviewEntityKeyFromParts(station.groupId, normalizeNameForSearch(station.name));
+    return STATION_REVIEW_SUMMARY_BY_ENTITY_KEY.update(
+        entityKey,
+        async (summary) => summary ?? ReviewStorageClient.getStationReviewSummaryAsync(station));
+};
+
+const retrieveMenuItemOnlyReviewSummaryAsync = async (menuItem: IMenuItemBase): Promise<IReviewSummary> => {
+    return MENU_ITEM_REVIEW_SUMMARY_BY_ENTITY_KEY.update(
+        menuItem.entityKey,
+        async (summary) => summary ?? ReviewStorageClient.getMenuItemOnlyReviewSummaryAsync(menuItem));
+};
+
+const retrieveStationReviewSummaryForMenuItemAsync = async (stationId: string): Promise<IReviewSummary> => {
+    const station = await StationStorageClient.retrieveStationAsync(stationId);
+    if (station == null) {
+        return createEmptySummary();
+    }
+    return retrieveStationReviewSummaryAsync({ name: station.name, groupId: station.groupId });
+};
+
+export const retrieveReviewSummaryAsync = async (menuItem: IMenuItemBase): Promise<IReviewSummary> => {
+    const [menuItemSummary, stationSummary] = await Promise.all([
+        retrieveMenuItemOnlyReviewSummaryAsync(menuItem),
+        retrieveStationReviewSummaryForMenuItemAsync(menuItem.stationId),
+    ]);
+
+    return combineSummaries(menuItemSummary, stationSummary);
+};
 
 /**
  * Snapshot of the in-memory menu-item review header cache, keyed by entityKey.

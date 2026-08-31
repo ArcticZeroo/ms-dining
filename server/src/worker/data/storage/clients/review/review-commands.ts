@@ -9,6 +9,7 @@ import { ReviewStorageClient } from './review.js';
 import {
     retrieveReviewHeaderAsync,
     retrieveReviewHeaderByPartsAsync,
+    retrieveReviewSummaryAsync,
     retrieveStationReviewHeaderAsync,
     retrieveStationReviewHeaderByPartsAsync,
 } from '../../../cache/reviews.js';
@@ -24,6 +25,10 @@ export const reviewServiceCommands = {
         ReviewStorageClient.getReviewsForStationAsync(station),
     getReviewsForUser: async ({ userId, menuItemId }: { userId: string; menuItemId?: string }) =>
         ReviewStorageClient.getReviewsForUserAsync({ userId, menuItemId }),
+    retrieveReviewSummary: async ({ menuItem }: { menuItem: IMenuItemBase }) =>
+        retrieveReviewSummaryAsync(menuItem),
+    getMyReviews: async ({ userId, menuItemId, stationId }: { userId: string; menuItemId?: string; stationId?: string }) =>
+        ReviewStorageClient.getMyReviews({ userId, menuItemId, stationId }),
     retrieveReviewHeader: async ({ menuItem }: { menuItem: IMenuItemBase }) =>
         retrieveReviewHeaderAsync(menuItem),
     retrieveStationReviewHeader: async ({ station }: { station: { name: string; groupId?: string | null } }) =>

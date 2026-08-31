@@ -32,13 +32,17 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
                         <>
                             <button
                                 disabled={!canDecreaseQuantity}
-                                onClick={onRemoveQuantityClicked}>
+                                onClick={onRemoveQuantityClicked}
+                                className="default-button default-container icon-container"
+                            >
                                 <span className="material-symbols-outlined">
                                     remove
                                 </span>
                             </button>
                             <button
-                                onClick={onAddQuantityClicked}>
+                                onClick={onAddQuantityClicked}
+                                className="default-button default-container icon-container"
+                            >
                                 <span className="material-symbols-outlined">
                                     add
                                 </span>

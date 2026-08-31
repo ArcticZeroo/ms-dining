@@ -1,4 +1,5 @@
 import { ICafeOrderReviewData } from '@msdining/common/models/order';
+import { IReview, IReviewSummary, IReviewWithComment } from '@msdining/common/models/review';
 import { logError } from '../../../../../shared/util/log.js';
 import { usePrismaClient, usePrismaWrite } from '../../client.js';
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
@@ -9,7 +10,7 @@ import {
     getMenuItemReviewHeaders,
     getStationReviewHeaders,
 } from '@prisma/client/sql';
-import { IServerReview } from '../../../../../shared/models/review.js';
+import { IServerReview, serializeReview } from '../../../../../shared/models/review.js';
 import { StationStorageClient } from '../station/station.js';
 import type {
     ICreateMenuItemReviewInput,
@@ -227,6 +228,83 @@ export abstract class ReviewStorageClient {
                 createdAt: 'desc'
             }
         }));
+    }
+
+    // Builds the shareable (user-agnostic) aggregate summary for a set of
+    // reviews: rating distribution, total count, overall rating, and the
+    // serialized reviews that carry a comment. The caller's own review is
+    // never included here — it is layered on per-request by the route.
+    static #buildAggregateSummary(reviews: IServerReview[]): IReviewSummary {
+        const summary: IReviewSummary = {
+            counts:              {},
+            reviewsWithComments: [],
+            totalCount:          0,
+            overallRating:       0,
+        };
+
+        let ratingSum = 0;
+        for (const review of reviews) {
+            summary.totalCount += 1;
+            ratingSum += review.rating;
+            summary.counts[review.rating] = (summary.counts[review.rating] || 0) + 1;
+
+            if (review.comment != null && review.comment.trim().length > 0) {
+                const serializedReview = serializeReview(review);
+                serializedReview.comment = review.comment;
+                summary.reviewsWithComments.push(serializedReview as IReviewWithComment);
+            }
+        }
+
+        if (summary.totalCount > 0) {
+            summary.overallRating = ratingSum / summary.totalCount;
+        }
+
+        return summary;
+    }
+
+    // Aggregate summary over a menu item's own reviews only (no station
+    // reviews). Cache-miss path for the review summary cache.
+    public static async getMenuItemOnlyReviewSummaryAsync(menuItem: IMenuItemBase): Promise<IReviewSummary> {
+        const whereCondition: Prisma.ReviewWhereInput = {};
+        if (menuItem.groupId) {
+            whereCondition.menuItem = { groupId: menuItem.groupId };
+        } else {
+            whereCondition.menuItem = { normalizedName: normalizeNameForSearch(menuItem.name), groupId: null };
+        }
+
+        const reviews = await usePrismaClient(client => client.review.findMany({
+            where:   whereCondition,
+            include: REVIEW_ENTITY_SELECT,
+            orderBy: {
+                createdAt: 'desc'
+            }
+        }));
+
+        return ReviewStorageClient.#buildAggregateSummary(reviews);
+    }
+
+    // Aggregate summary over a station's reviews. Cache-miss path for the
+    // station review summary cache.
+    public static async getStationReviewSummaryAsync(station: { name: string; groupId?: string | null }): Promise<IReviewSummary> {
+        const reviews = await this.getReviewsForStationAsync(station);
+        return ReviewStorageClient.#buildAggregateSummary(reviews);
+    }
+
+    public static async getMyReviews({ userId, menuItemId, stationId }: { userId: string; menuItemId?: string; stationId?: string }): Promise<{ menuItemReview: IReview | null; stationReview: IReview | null }> {
+        const [menuItemReview, stationReview] = await usePrismaClient((client) => {
+            const findMyReview = (where: Prisma.ReviewWhereUniqueInput) =>
+                client.review.findUnique({ where, include: REVIEW_ENTITY_SELECT });
+
+            return Promise.all([
+                menuItemId == null ? null : findMyReview({ userId_menuItemId: { userId, menuItemId } }),
+                stationId == null ? null : findMyReview({ userId_stationId: { userId, stationId } }),
+            ]);
+        });
+
+        return {
+            menuItemReview: menuItemReview == null ? null : serializeReview(menuItemReview),
+            stationReview:  stationReview == null ? null : serializeReview(stationReview),
+        };
     }
 
     public static async updateReviewAsync(reviewId: string, data: IUpdateReviewInput) {

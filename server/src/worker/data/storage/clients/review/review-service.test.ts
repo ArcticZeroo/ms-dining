@@ -239,6 +239,53 @@ test('retrieveReviewHeader returns aggregate data for a menu item', async () => 
     assert.equal(typeof header.overallRating, 'number');
 });
 
+test('retrieveReviewSummary aggregates a station review into the menu-item summary', async () => {
+
+    const menuItemComment = nextId('summary-menu-item');
+    const stationComment = nextId('summary-station');
+
+    await getServices().data.review.createMenuItemReview({
+        review: {
+            menuItemId:     MENU_ITEM.id,
+            normalizedName: MENU_ITEM_NORMALIZED_NAME,
+            rating:         9,
+            comment:        menuItemComment,
+            displayName:    'Summary Menu Reviewer',
+            groupId:        null,
+        },
+    });
+
+    await getServices().data.review.createStationReview({
+        review: {
+            stationId:      STATION.id,
+            normalizedName: STATION_NORMALIZED_NAME,
+            rating:         7,
+            comment:        stationComment,
+            displayName:    'Summary Station Reviewer',
+            groupId:        null,
+        },
+    });
+
+    const summary = await getServices().data.review.retrieveReviewSummary({ menuItem: MENU_ITEM });
+
+    assert.ok((summary.counts[9] ?? 0) >= 1, 'menu-item review counted');
+    assert.ok((summary.counts[7] ?? 0) >= 1, 'station review aggregated into the menu-item summary');
+    assert.ok(summary.reviewsWithComments.some(review => review.comment === menuItemComment));
+    assert.ok(summary.reviewsWithComments.some(review => review.comment === stationComment), 'station comment appears in the menu-item summary');
+});
+
+test('getMyReviews returns null when the user has no review', async () => {
+
+    const mine = await getServices().data.review.getMyReviews({
+        userId:     'nonexistent-review-user',
+        menuItemId: MENU_ITEM.id,
+        stationId:  STATION.id,
+    });
+
+    assert.equal(mine.menuItemReview, null);
+    assert.equal(mine.stationReview, null);
+});
+
 test('retrieveReviewHeaderByParts returns data for a name', async () => {
 
     const header = await getServices().data.review.retrieveReviewHeaderByParts({

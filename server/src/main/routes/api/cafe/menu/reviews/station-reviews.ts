@@ -1,12 +1,10 @@
 import Router, { RouterContext } from '@koa/router';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
-import { IReviewSummary, IReviewWithComment } from '@msdining/common/models/review';
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
-import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
+import { attachRouter, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { getServices } from '../../../../../../shared/services/registry.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
-import { reviewCacheController, serializeReview } from './shared.js';
+import { reviewCacheController } from './shared.js';
 
 export const registerStationReviewRoutes = (parent: Router) => {
     const router = new Router({
@@ -26,44 +24,6 @@ export const registerStationReviewRoutes = (parent: Router) => {
 
         return station;
     };
-
-    router.get('/reviews',
-        reviewCacheController,
-        async ctx => {
-            const userId = getMaybeUserId(ctx);
-            const station = await getStationFromRequest(ctx);
-
-            const reviews = await getServices().data.review.getReviewsForStation({ station });
-
-            const response: IReviewSummary = {
-                counts:              {},
-                reviewsWithComments: [],
-                totalCount:          0,
-                overallRating:       0,
-            };
-
-            for (const review of reviews) {
-                response.totalCount += 1;
-                response.overallRating += review.rating;
-                response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
-
-                if (review.comment != null && review.comment.trim().length > 0) {
-                    const serializedReview = serializeReview(review);
-                    serializedReview.comment = review.comment;
-                    response.reviewsWithComments.push(serializedReview as IReviewWithComment);
-                }
-
-                if (review.stationId === station.id && userId != null && review.userId === userId) {
-                    response.myReview = serializeReview(review);
-                }
-            }
-
-            if (reviews.length > 0) {
-                response.overallRating /= reviews.length;
-            }
-
-            ctx.body = jsonStringifyWithoutNull(response);
-        });
 
     router.put('/reviews',
         requireAuthenticated,

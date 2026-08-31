@@ -1,6 +1,5 @@
 import Router, { RouterContext } from '@koa/router';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
-import { IReviewSummary, IReviewWithComment } from '@msdining/common/models/review';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { isDuckType } from '@arcticzeroo/typeguard';
@@ -9,7 +8,7 @@ import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js
 import { sendVisitMiddleware } from '../../../../../middleware/analytics.js';
 import { getServices } from '../../../../../../shared/services/registry.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
-import { reviewCacheController, serializeReview } from './shared.js';
+import { assignReviewSummaryCacheControl, reviewCacheController } from './shared.js';
 
 export const registerMenuItemReviewRoutes = (parent: Router) => {
     const router = new Router({
@@ -32,49 +31,30 @@ export const registerMenuItemReviewRoutes = (parent: Router) => {
 
     router.get('/reviews',
         sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.getReviews),
-        reviewCacheController,
         async ctx => {
             const userId = getMaybeUserId(ctx);
             const menuItem = await getMenuItemFromRequest(ctx);
 
-            const { menuItemReviews, stationReviews } = await getServices().data.review.getReviewsForMenuItem({ menuItem });
+            const [response, myReviews] = await Promise.all([
+                getServices().data.review.retrieveReviewSummary({ menuItem }),
+                userId == null
+                    ? Promise.resolve(null)
+                    : getServices().data.review.getMyReviews({
+                        userId,
+                        menuItemId: menuItem.id,
+                        stationId:  menuItem.stationId,
+                    }),
+            ]);
 
-            const response: IReviewSummary = {
-                counts:              {},
-                reviewsWithComments: [],
-                totalCount:          0,
-                overallRating:       0,
-            };
-
-            const allReviews = [...menuItemReviews, ...stationReviews];
-
-            for (const review of allReviews) {
-                response.totalCount += 1;
-                response.overallRating += review.rating;
-                response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
-
-                if (review.comment != null && review.comment.trim().length > 0) {
-                    const serializedReview = serializeReview(review);
-                    serializedReview.comment = review.comment;
-                    response.reviewsWithComments.push(serializedReview as IReviewWithComment);
-                }
+            if (myReviews?.menuItemReview != null) {
+                response.myReview = myReviews.menuItemReview;
             }
 
-            if (userId != null) {
-                const myMenuItemReview = menuItemReviews.find(review => review.menuItemId === menuItem.id && review.userId === userId);
-                if (myMenuItemReview) {
-                    response.myReview = serializeReview(myMenuItemReview);
-                }
-
-                const myStationReview = stationReviews.find(review => review.userId === userId);
-                if (myStationReview) {
-                    response.myStationReview = serializeReview(myStationReview);
-                }
+            if (myReviews?.stationReview != null) {
+                response.myStationReview = myReviews.stationReview;
             }
 
-            if (allReviews.length > 0) {
-                response.overallRating /= allReviews.length;
-            }
+            assignReviewSummaryCacheControl(ctx, userId);
 
             ctx.body = jsonStringifyWithoutNull(response);
         });
