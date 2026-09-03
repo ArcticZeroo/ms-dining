@@ -10,7 +10,7 @@ export const OnlineOrderingPrivacy = () => {
     return (
         <div className="card notice visible">
             <span>
-                Your payment information is never stored by this website. From all information on this checkout page, only the order contents are stored.
+                Your payment information is never stored by this website.
             </span>
             <span>
                 By clicking "Pay" you agree to the privacy and data collection policies of the 3rd-party services handling your order. These services likely store some payment information.
